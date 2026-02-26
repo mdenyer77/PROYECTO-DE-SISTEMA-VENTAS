@@ -1,4 +1,4 @@
 # sistema ventas 
 ## Vista del Proyecto
 
-![Mi imagen]()
+![Mi imagen](Productos.jpeg)
