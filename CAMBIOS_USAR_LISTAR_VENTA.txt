@@ -1,0 +1,159 @@
+# ? CAMBIOS REALIZADOS - USAR ListarVentas() EN LUGAR DE ListarVentasConCliente()
+
+## ?? Lo que cambió
+
+El usuario solicitó que Form3 use `ListarVentas()` (método simple) en lugar de `ListarVentasConCliente()`.
+
+---
+
+## ?? Cambios realizados
+
+### 1. CapaNegocio/VentasBL.cs
+**Eliminado el método `ListarVentasConCliente()`**
+
+```csharp
+// ? ELIMINADO:
+public DataTable ListarVentasConCliente()
+{
+    return ventasDAL.ListarVentasConCliente();
+}
+
+// ? SE MANTIENE:
+public List<Ventas> ListarVentas()
+{
+    return ventasDAL.Listar();
+}
+```
+
+### 2. CapaPresentacion/Form3.cs - CargarVentas()
+**Cambio de método llamado**
+
+**ANTES:**
+```csharp
+private void CargarVentas()
+{
+    try
+    {
+        DataTable dt = ventasBL.ListarVentasConCliente();
+        
+        if (dt != null && dt.Rows.Count > 0)
+        {
+            dataGridView1.DataSource = dt;
+        }
+        else
+        {
+            dataGridView1.DataSource = null;
+            MessageBox.Show("No hay ventas registradas", "Información", 
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show("Error al cargar las ventas: " + ex.Message, "Error", 
+            MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+}
+```
+
+**DESPUÉS:**
+```csharp
+private void CargarVentas()
+{
+    try
+    {
+        var ventas = ventasBL.ListarVentas();
+        
+        if (ventas != null && ventas.Count > 0)
+        {
+            dataGridView1.DataSource = ventas;
+        }
+        else
+        {
+            dataGridView1.DataSource = null;
+            MessageBox.Show("No hay ventas registradas", "Información", 
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+    }
+    catch (Exception ex)
+    {
+        MessageBox.Show("Error al cargar las ventas: " + ex.Message, "Error", 
+            MessageBoxButtons.OK, MessageBoxIcon.Error);
+    }
+}
+```
+
+---
+
+## ?? Resumen de cambios
+
+| Aspecto | Antes | Después |
+|---------|-------|---------|
+| Método usado | `ListarVentasConCliente()` | `ListarVentas()` |
+| Tipo devuelto | `DataTable` | `List<Ventas>` |
+| Líneas de código | Más líneas | Menos líneas |
+| Procedimiento SQL | `sp_ListarVentasConCliente` | `sp_listar_venta` |
+| Complejidad | Media | Baja |
+
+---
+
+## ? Compilación
+
+```
+? EXITOSA
+? 0 errores
+? 0 advertencias
+```
+
+---
+
+## ?? Ventajas
+
+1. **Más simple**: Usa el método básico `ListarVentas()`
+2. **Menos dependencias**: No necesita `ListarVentasConCliente()`
+3. **Código más limpio**: Menos métodos redundantes
+4. **Procedimiento simple**: Usa `sp_listar_venta` que ya existía
+
+---
+
+## ?? Procedimiento SQL que ahora se usa
+
+```sql
+-- sp_listar_venta (ya existía)
+CREATE PROCEDURE sp_listar_venta
+AS
+BEGIN
+    SELECT 
+        ID_venta,
+        Fecha_venta,
+        ID_cliente,
+        Total_general,
+        Estado_venta
+    FROM Ventas
+    ORDER BY Fecha_venta DESC
+END
+```
+
+Este procedimiento es más simple que `sp_ListarVentasConCliente` y ya estaba en tu BD.
+
+---
+
+## ?? Próximos pasos
+
+1. ? Código está compilado
+2. ?? Abre Form3 de nuevo
+3. ?? Deberías ver tus ventas cargadas
+
+---
+
+## ?? Nota importante
+
+Si antes no funcionaba porque el procedimiento `sp_ListarVentasConCliente` no existía, ahora:
+
+- **Si tienes datos en Ventas**: Los verá inmediatamente
+- **Si no tienes datos**: Mostrará "No hay ventas registradas"
+
+---
+
+**Cambio completado** ?
+**Estado**: Compilado correctamente
+**Listo para probar**: SÍ

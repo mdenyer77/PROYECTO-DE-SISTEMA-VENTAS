@@ -1,0 +1,156 @@
+# ?? ERROR: "El nombre de objeto ventas no es válido"
+
+## ¿QUÉ SIGNIFICA ESTE ERROR?
+
+El procedimiento almacenado **`sp_ListarVentasConCliente` NO EXISTE en tu base de datos**.
+
+---
+
+## ?? SOLUCIÓN - PASO A PASO
+
+### PASO 1: Abre SQL Server Management Studio
+1. Abre **SQL Server Management Studio**
+2. Conectate a tu base de datos
+
+### PASO 2: Copia el SQL
+Copia TODO este código:
+
+```sql
+-- Primero, elimina si existe:
+IF EXISTS (SELECT 1 FROM sys.objects WHERE type = 'P' AND name = 'sp_ListarVentasConCliente')
+BEGIN
+    DROP PROCEDURE sp_ListarVentasConCliente
+END
+GO
+
+-- Ahora crea el procedimiento:
+CREATE PROCEDURE sp_ListarVentasConCliente
+AS
+BEGIN
+    SELECT 
+        v.ID_venta,
+        v.Fecha_venta,
+        c.ID_cliente,
+        c.Nombre AS Cliente_Nombre,
+        c.Telefono AS Cliente_Telefono,
+        c.Direccion AS Cliente_Direccion,
+        v.Total_general,
+        CASE WHEN v.Estado_venta = 1 THEN 'Activa' ELSE 'Cancelada' END AS Estado_venta
+    FROM Ventas v
+    INNER JOIN Cliente c ON v.ID_cliente = c.ID_cliente
+    ORDER BY v.Fecha_venta DESC
+END
+GO
+```
+
+### PASO 3: Pega en SQL Server
+1. En SQL Server Management Studio, crea una **Nueva consulta**
+2. Pega el código
+3. Presiona **Ejecutar** (F5)
+
+### PASO 4: Verifica que se creó
+Ejecuta esto en una nueva consulta:
+
+```sql
+SELECT * FROM sys.objects WHERE type = 'P' AND name = 'sp_ListarVentasConCliente'
+```
+
+Deberías ver una fila con el procedimiento.
+
+### PASO 5: Prueba el procedimiento
+Ejecuta esto:
+
+```sql
+EXEC sp_ListarVentasConCliente
+```
+
+Deberías ver tus ventas (si existen en la BD).
+
+---
+
+## ? SI TODO FUNCIONA:
+
+Ahora cierra SQL Server y regresa a tu aplicación:
+
+1. Cierra Form3
+2. Vuelve a abrir Form3
+3. **Deberías ver todas las ventas cargadas**
+
+---
+
+## ? SI SIGUE FALLANDO:
+
+### Verifica el nombre de tu tabla:
+```sql
+-- Ver todas las tablas:
+SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE = 'BASE TABLE'
+```
+
+Busca:
+- `Ventas` (con V mayúscula, plural) ?
+- `venta` (minúscula, singular) ?
+
+Si tu tabla se llama `venta` (singular), usa este procedimiento:
+
+```sql
+IF EXISTS (SELECT 1 FROM sys.objects WHERE type = 'P' AND name = 'sp_ListarVentasConCliente')
+BEGIN
+    DROP PROCEDURE sp_ListarVentasConCliente
+END
+GO
+
+CREATE PROCEDURE sp_ListarVentasConCliente
+AS
+BEGIN
+    SELECT 
+        v.ID_venta,
+        v.Fecha_venta,
+        c.ID_cliente,
+        c.Nombre AS Cliente_Nombre,
+        c.Telefono AS Cliente_Telefono,
+        c.Direccion AS Cliente_Direccion,
+        v.Total_general,
+        CASE WHEN v.Estado_venta = 1 THEN 'Activa' ELSE 'Cancelada' END AS Estado_venta
+    FROM venta v  -- ? CAMBIO: venta (singular)
+    INNER JOIN cliente c ON v.ID_cliente = c.ID_cliente  -- ? CAMBIO: cliente (singular)
+    ORDER BY v.Fecha_venta DESC
+END
+GO
+```
+
+### Verifica el nombre de tus columnas:
+```sql
+-- Ver columnas de tabla Ventas:
+SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Ventas'
+
+-- Ver columnas de tabla Cliente:
+SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Cliente'
+```
+
+Si encuentras nombres diferentes, actualiza el procedimiento.
+
+---
+
+## ?? RESUMEN
+
+```
+Error:           "El nombre de objeto ventas no es válido"
+Causa:           Procedimiento sp_ListarVentasConCliente no existe
+Solución:        Crear el procedimiento con el SQL proporcionado
+Tiempo:          2 minutos
+Dificultad:      ? (muy fácil)
+```
+
+---
+
+## ?? PRÓXIMOS PASOS
+
+1. ? Ejecuta el SQL para crear el procedimiento
+2. ? Verifica que se creó
+3. ? Prueba el procedimiento desde SQL
+4. ? Cierra y abre Form3 de nuevo
+5. ? Deberías ver tus ventas
+
+---
+
+**Si después de esto sigue sin funcionar, avísame y revisamos las tablas de tu BD.**
